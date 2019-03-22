@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <context:component-scan base-package="org.lhyf.springmvc"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <mvc:annotation-driven></mvc:annotation-driven>
+
+    <!--配置国际化-->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="i18n"></property>
+    </bean>
+
+    <!--配置SessionLocaleResolver-->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+
+
+    <mvc:interceptors>
+        <!--配置自定义的拦截器-->
+        <bean class="org.lhyf.springmvc.interceptor.FirstInterceptor"></bean>
+
+        <!--配置拦截器(不)作用路径-->
+        <mvc:interceptor>
+            <mvc:mapping path="/login"/>
+            <bean class="org.lhyf.springmvc.interceptor.SecondInterceptor"></bean>
+        </mvc:interceptor>
+
+        <!--配置LocaleChangeInterceptor-->
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+    </mvc:interceptors>
+
+    <mvc:view-controller path="/index" view-name="index"></mvc:view-controller>
+
+    <!--SpringMVC 配置文件上传-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <!-- 设置最大上传文件大小 (单位 bytes) ,默认 -1 (没有限制)-->
+        <property name="maxUploadSize" value="10240000"></property>
+    </bean>
+
+
+    <!-- 配置使用 SimpleMappingExceptionResolver 来映射异常 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.ArithmeticException">error</prop>
+            </props>
+        </property>
+    </bean>
+    
+</beans>
