@@ -1,6 +1,5 @@
 package org.lhyf.springmvc.controller;
 
-import com.sun.org.apache.xpath.internal.axes.WalkingIterator;
 import org.lhyf.springmvc.entity.Address;
 import org.lhyf.springmvc.entity.User;
 import org.springframework.stereotype.Controller;
@@ -38,7 +37,7 @@ public class SpringMVCTest {
      *
      * @param binder
      */
-    @InitBinder
+//    @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.setDisallowedFields("lastName");
     }
@@ -100,7 +99,7 @@ public class SpringMVCTest {
      * @param id
      * @param map
      */
-    @ModelAttribute
+//    @ModelAttribute
     public void getUser(@RequestParam(value = "id", required = false) Integer id,
                         Map<String, Object> map) {
         if (id != null) {

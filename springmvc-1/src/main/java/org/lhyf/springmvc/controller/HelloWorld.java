@@ -1,5 +1,6 @@
 package org.lhyf.springmvc.controller;
 
+import org.lhyf.springmvc.entity.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,6 +32,12 @@ public class HelloWorld {
 
     @RequestMapping("/index")
     public String hello() {
+        return "success";
+    }
+
+    @RequestMapping("/test/databinder")
+    public String testDataBinder(User user){
+        System.out.println(user);
         return "success";
     }
 }
