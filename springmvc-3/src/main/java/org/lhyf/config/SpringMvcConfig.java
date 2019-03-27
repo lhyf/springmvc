@@ -1,12 +1,13 @@
 package org.lhyf.config;
 
-import org.lhyf.interceptor.LoginInterceptor;
-import org.lhyf.interceptor.ValidateInterceptor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.*;
+
+import java.util.concurrent.Executors;
 
 /****
  * @author YF
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.*;
         includeFilters = {@Filter(type = FilterType.ANNOTATION, classes = {Controller.class})},
         useDefaultFilters = false)
 @EnableWebMvc
+//@EnableAsync
 public class SpringMvcConfig implements WebMvcConfigurer {
 
     // 配置 default-servlet-handler ,处理静态资源
@@ -37,9 +39,17 @@ public class SpringMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**");
-        registry.addInterceptor(new ValidateInterceptor()).addPathPatterns("/**");
+//        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**");
+//        registry.addInterceptor(new ValidateInterceptor()).addPathPatterns("/**");
     }
 
-
+    /**
+     * 配置异步响应需要的线程池
+     * @param configurer
+     */
+    @Override
+    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor(Executors.newFixedThreadPool(5));
+        configurer.setTaskExecutor(executor);
+    }
 }
