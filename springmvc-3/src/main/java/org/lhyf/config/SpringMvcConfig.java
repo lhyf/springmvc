@@ -1,5 +1,6 @@
 package org.lhyf.config;
 
+import org.lhyf.interceptor.TaskAsyncHandlerInterceptor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
@@ -39,6 +40,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor( new TaskAsyncHandlerInterceptor()).addPathPatterns("/**");
 //        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**");
 //        registry.addInterceptor(new ValidateInterceptor()).addPathPatterns("/**");
     }

@@ -5,6 +5,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /****
  * @author YF
@@ -14,7 +15,7 @@ import java.util.Map;
  **/
 @Component
 public class DeferredResultMap {
-    private Map<String, DeferredResult<Object>> map = new HashMap<>();
+    private Map<String, DeferredResult<Object>> map = new ConcurrentHashMap<>();
 
     public void put(String key, DeferredResult<Object> result) {
         map.put(key, result);
@@ -26,7 +27,6 @@ public class DeferredResultMap {
 
     public void remove(String key) {
         map.remove(key);
-        System.out.println("map size : "+ map.size());
     }
 
     public int size(){

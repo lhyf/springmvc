@@ -5,7 +5,6 @@ import org.lhyf.service.LoginService;
 import org.lhyf.util.DeferredResultMap;
 import org.lhyf.util.ProtostuffSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,7 +92,7 @@ public class IndexController {
     @ResponseBody
     @RequestMapping("/create-order")
     public DeferredResult<Object> createOrder() {
-        DeferredResult<Object> result = new DeferredResult<>(4000L, "create fail...");
+        DeferredResult<Object> result = new DeferredResult<>(400L, "create fail...");
         RequestEntity entity = new RequestEntity();
         entity.setNumber("123456");
         entity.setName("name");
@@ -105,6 +104,20 @@ public class IndexController {
             entity.setSerial(incr);
             byte[] bytes = ProtostuffSerializer.serialize(entity);
             jedis.lpush("task1".getBytes(), bytes);
+
+            result.onTimeout(new Runnable() {
+                @Override
+                public void run() {
+                    deferredResultMap.remove(String.valueOf(incr));
+                }
+            });
+            result.onCompletion(new Runnable() {
+                @Override
+                public void run() {
+                    deferredResultMap.remove(String.valueOf(incr));
+                }
+            });
+
             deferredResultMap.put(String.valueOf(incr), result);
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,5 +174,16 @@ public class IndexController {
             }
         }
         return uuid;
+    }
+
+    @ResponseBody
+    @RequestMapping("/call-back")
+    public DeferredResult<Object> callBack() {
+        // 4秒后未响应，则返回 create fail...
+        DeferredResult<Object> result = new DeferredResult<>(4000L, "create fail...");
+        result.onCompletion( () -> System.out.println("Processing complete..."));
+        result.onTimeout(() -> result.setErrorResult("Request timeout..."));
+        result.onError((Throwable t) -> {result.setErrorResult("Request error...");});
+        return result;
     }
 }
