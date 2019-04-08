@@ -1,7 +1,9 @@
 package org.lhyf.controller;
 
+import org.lhyf.entity.RequestEntity;
 import org.lhyf.service.LoginService;
-import org.lhyf.util.DeferredResultQueue;
+import org.lhyf.util.DeferredResultMap;
+import org.lhyf.util.ProtostuffSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -10,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -32,7 +37,11 @@ public class IndexController {
     private LoginService loginService;
 
     @Autowired
-    private DeferredResultQueue<DeferredResult<Object>> deferredResultQueue;
+    private JedisPool jedisPool;
+
+
+    @Autowired
+    private DeferredResultMap deferredResultMap;
 
     @RequestMapping(value = {"", "/"})
     public ModelAndView index() {
@@ -85,8 +94,40 @@ public class IndexController {
     @RequestMapping("/create-order")
     public DeferredResult<Object> createOrder() {
         DeferredResult<Object> result = new DeferredResult<>(4000L, "create fail...");
-        deferredResultQueue.save(result);
+        RequestEntity entity = new RequestEntity();
+        entity.setNumber("123456");
+        entity.setName("name");
+
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            Long incr = jedis.incr("taskline1");
+            entity.setSerial(incr);
+            byte[] bytes = ProtostuffSerializer.serialize(entity);
+            jedis.lpush("task1".getBytes(), bytes);
+            deferredResultMap.put(String.valueOf(incr), result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+//        deferredResultQueue.save(result);
         return result;
+    }
+
+
+    @ResponseBody
+    @RequestMapping("/get-size")
+    public String getMapSize() {
+        return deferredResultMap.size() + ":";
+    }
+
+    @ResponseBody
+    @RequestMapping("/get-all-map")
+    public Map getAllMap() {
+        return deferredResultMap.getMap();
     }
 
     /**
@@ -98,8 +139,27 @@ public class IndexController {
     @RequestMapping("/process-order")
     public String processOrder() {
         String uuid = UUID.randomUUID().toString();
-        DeferredResult<Object> result = deferredResultQueue.get();
-        result.setResult(uuid);
+        Jedis jedis = null;
+        Long serial = null;
+        try {
+            jedis = jedisPool.getResource();
+            byte[] bytes = jedis.rpop("task1".getBytes());
+            RequestEntity entity = ProtostuffSerializer.deserialize(bytes);
+            serial = entity.getSerial();
+            String name = entity.getName();
+            String number = entity.getNumber();
+            System.out.println(name + ":" + number);
+            DeferredResult<Object> result = deferredResultMap.get(String.valueOf(serial));
+            result.setResult(uuid);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            deferredResultMap.remove(String.valueOf(serial));
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
         return uuid;
     }
 }

@@ -1,10 +1,14 @@
 package org.lhyf.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Controller;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /****
  * @author YF
@@ -18,5 +22,11 @@ import org.springframework.stereotype.Controller;
 )
 @Configuration
 public class SpringConfig {
+
+    @Bean
+    public ExecutorService theadPool(){
+        ExecutorService pool = Executors.newFixedThreadPool(20);
+        return pool;
+    }
 
 }
