@@ -100,6 +100,7 @@ public class IndexController {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
+            // 获取唯一的序列号,如果序列号错误,将会导致A请求结果可能是其他请求的响应.
             Long incr = jedis.incr("taskline1");
             entity.setSerial(incr);
             byte[] bytes = ProtostuffSerializer.serialize(entity);
