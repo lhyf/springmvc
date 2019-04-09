@@ -15,6 +15,6 @@ public class RedisConfig {
 
     @Bean
     public JedisPool jedisPool(){
-        return new JedisPool();
+        return new JedisPool("192.168.199.250",6379);
     }
 }

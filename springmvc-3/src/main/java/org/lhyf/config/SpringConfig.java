@@ -25,7 +25,7 @@ public class SpringConfig {
 
     @Bean
     public ExecutorService theadPool(){
-        ExecutorService pool = Executors.newFixedThreadPool(20);
+        ExecutorService pool = Executors.newFixedThreadPool(200);
         return pool;
     }
 
