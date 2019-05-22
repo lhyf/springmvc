@@ -61,8 +61,9 @@ public class TaskListener implements ApplicationListener<ContextRefreshedEvent> 
             public void run() {
                 try {
                     Jedis jedis = jedisPool.getResource();
+                    List<byte[]> list = null;
                     while (true) {
-                        List<byte[]> list = jedis.brpop(0, "task1".getBytes()); // 如果没有内容,将被阻塞
+                        list = jedis.brpop(0, "task1".getBytes()); // 如果没有内容,将被阻塞
                         RequestEntity entity = null;
 
                         // list 的第一个元素是key的字节数组,第二个才是pop弹出的值

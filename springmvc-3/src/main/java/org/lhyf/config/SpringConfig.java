@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Controller;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /****
  * @author YF
@@ -24,8 +23,10 @@ import java.util.concurrent.Executors;
 public class SpringConfig {
 
     @Bean
-    public ExecutorService theadPool(){
-        ExecutorService pool = Executors.newFixedThreadPool(20);
+    public ExecutorService theadPool() {
+//        ExecutorService pool = Executors.newFixedThreadPool(20);
+        ExecutorService pool = new ThreadPoolExecutor(20, 50, 0L,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         return pool;
     }
 
