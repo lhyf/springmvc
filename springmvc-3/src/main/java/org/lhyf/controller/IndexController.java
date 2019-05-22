@@ -92,7 +92,7 @@ public class IndexController {
     @ResponseBody
     @RequestMapping("/create-order")
     public DeferredResult<Object> createOrder() {
-        DeferredResult<Object> result = new DeferredResult<>(400L, "create fail...");
+        DeferredResult<Object> result = new DeferredResult<>(2000L, "create fail...");
         RequestEntity entity = new RequestEntity();
         entity.setNumber("123456");
         entity.setName("name");
@@ -100,6 +100,7 @@ public class IndexController {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
+            // 获取唯一的序列号,如果序列号错误,将会导致A请求结果可能是其他请求的响应.
             Long incr = jedis.incr("taskline1");
             entity.setSerial(incr);
             byte[] bytes = ProtostuffSerializer.serialize(entity);
@@ -134,7 +135,17 @@ public class IndexController {
     @ResponseBody
     @RequestMapping("/get-size")
     public String getMapSize() {
-        return deferredResultMap.size() + ":";
+        Jedis jedis = null;
+        Long len = null;
+        try {
+            jedis = jedisPool.getResource();
+            len = jedis.llen("task1".getBytes());
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            jedis.close();
+        }
+        return deferredResultMap.size() + " : " + len;
     }
 
     @ResponseBody
