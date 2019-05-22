@@ -83,6 +83,7 @@ public class TaskListener implements ApplicationListener<ContextRefreshedEvent> 
                                     public void run() {
                                         try {
                                             DeferredResult<Object> result = deferredResultMap.get(String.valueOf(serial));
+                                            // result != null 表示还未超时,如果DeferredResult响应超时,则它的超时回调函数会将其从Map中移除
                                             if (result != null) {
 //                                                Thread.sleep(1000);
                                                 uuid = UUID.randomUUID().toString();

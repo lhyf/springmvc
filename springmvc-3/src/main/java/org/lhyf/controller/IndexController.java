@@ -28,6 +28,15 @@ import java.util.concurrent.Callable;
  * 1.针对于第一种,可以开启新的线程处理耗时的工作,同步响应用户ok状态
  *
  * 2.用户需要等待结果,则需要使用Servlet3.0的异步机制处理,如下面的异步处理
+ * 2.1 controller 使用redis.incr作为一个发号器,生成一个唯一序号
+ * 2.2 将请求参数与这个需要封装在一个对象中,并序列化,存入redis一个队列中
+ * 2.3 controller 创建一个DeferredResult,并未其设置超时,错误和响应完成的回调
+ * 2.4 设置好回调方法后,使用唯一序号作为key,DeferredResult作为value存入ConcurrentHashMap中
+ * 2.5 controller返回这个DeferredResult的实例
+ *
+ * 2.6 监听容器启动事件,事件触发后创建新线程阻塞读取上面的redis 队列,从中取出请求参数的封装对象
+ * 2.7 反序列化请求参数封装对象,并使用保存其中的唯一序列号,在上面的ConcurrentHashMap中获取对应的DeferredResult
+ * 2.8 如果获取到的为空,表示已经超时,跳过此次处理,如不为空,则使用请求参数进行逻辑处理,并将处理结果放入DeferredResult
  **/
 @Controller
 public class IndexController {
